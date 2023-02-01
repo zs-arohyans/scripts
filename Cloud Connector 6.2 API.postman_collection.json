@@ -1,0 +1,1558 @@
+{
+	"info": {
+		"_postman_id": "4ddb1377-330d-424a-ae5f-372882006e64",
+		"name": "Cloud Connector 6.2 API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18574414"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "Authenticate - Login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var timestamp = Date.now().toString();",
+									"postman.setEnvironmentVariable(\"timestamp\", timestamp);",
+									" ",
+									"// The highlighted key is the public api key which can be fetched from UI[API Key Management]",
+									" ",
+									"postman.setEnvironmentVariable(\"apikey\", obfuscateApiKey('YOURAPI', timestamp));",
+									"function obfuscateApiKey(apiKey, timestamp) {",
+									"       ",
+									"    var high = timestamp.substring(timestamp.length - 6);",
+									"    var low = (parseInt(high) >> 1).toString();",
+									"    var obfuscatedApiKey = '';",
+									" ",
+									"    while (low.length < 6) {",
+									"        low = '0' + low;",
+									"    }",
+									" ",
+									"    for (var i = 0; i < high.length; i++) {",
+									"        obfuscatedApiKey += apiKey.charAt(parseInt(high.charAt(i)));",
+									"    }",
+									" ",
+									"    for (var j = 0; j < low.length; j++) {",
+									"        obfuscatedApiKey += apiKey.charAt(parseInt(low.charAt(j)) + 2);",
+									"    }",
+									" ",
+									"    return \"\\\"\"+obfuscatedApiKey+\"\\\"\";",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capturing ZS_SESSION_CODE token",
+									"var sessionCode = postman.getResponseCookie(\"ZS_SESSION_CODE\").value;",
+									"pm.environment.set(\"sessionCode\", sessionCode);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"type": "text",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\":\"bac-admin@1234567.zscalertwo.net\",\"password\":\"YOURPASSWORD\",\"apiKey\":{{apikey}},\"timestamp\":{{timestamp}}}"
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/auth",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth"
+							]
+						},
+						"description": "Please change key in pre-req script and credentials in Body.\r\nLogin to the EC using valid api key and credentials."
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate - Logout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var timestamp = Date.now().toString();",
+									"postman.setEnvironmentVariable(\"timestamp\", timestamp);",
+									"postman.setEnvironmentVariable(\"apikey\", obfuscateApiKey('YOURAPI', timestamp));",
+									"",
+									"function obfuscateApiKey(apiKey, timestamp) {",
+									"       ",
+									"    var high = timestamp.substring(timestamp.length - 6);",
+									"    var low = (parseInt(high) >> 1).toString();",
+									"    var obfuscatedApiKey = '';",
+									"",
+									"    while (low.length < 6) {",
+									"        low = '0' + low;",
+									"    }",
+									"",
+									"    for (var i = 0; i < high.length; i++) {",
+									"        obfuscatedApiKey += apiKey.charAt(parseInt(high.charAt(i)));",
+									"    }",
+									"",
+									"    for (var j = 0; j < low.length; j++) {",
+									"        obfuscatedApiKey += apiKey.charAt(parseInt(low.charAt(j)) + 2);",
+									"    }",
+									"",
+									"    return \"\\\"\"+obfuscatedApiKey+\"\\\"\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"type": "text",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/auth",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Branch and Cloud Connector Groups",
+			"item": [
+				{
+					"name": "Branch and Cloud Connector Groups - Get All Groups and VMs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/ecgroup",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ecgroup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Branch and Cloud Connector Groups - Get Individual VM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/ecgroup/{id}/vm/{vmid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ecgroup",
+								"{id}",
+								"vm",
+								"{vmid}"
+							]
+						},
+						"description": "Please provide the id of the ecGroup and vm"
+					},
+					"response": []
+				},
+				{
+					"name": "Branch and Cloud Connector Groups - Delete Individual VM",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/ecgroup/{id}/vm/{vmid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ecgroup",
+								"{id}",
+								"vm",
+								"{vmid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Branch and Cloud Connector Groups - Get Individual Group and VMs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ecgroup/2409122",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ecgroup",
+								"2409122"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Location Management",
+			"item": [
+				{
+					"name": "Location Management - Get All Locations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/location",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"location"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Get All Locations (Lite)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/location/lite",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"location",
+								"lite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Get Individual Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/location/{locid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"location",
+								"{locid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Get All Location Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/locationTemplate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Get All Location Templates (Lite)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/locationTemplate/lite",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate",
+								"lite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Get Individual Location Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/locationTemplate/{locTempID}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate",
+								"{locTempID}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Create Location Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Test_Location_Template\",\r\n    \"desc\": \"Testing\",\r\n    \"template\": {\r\n        \"templatePrefix\": \"temp\",\r\n        \"xffForwardEnabled\": false,\r\n        \"authRequired\": true,\r\n        \"cautionEnabled\": false,\r\n        \"aupEnabled\": false,\r\n        \"ofwEnabled\": false,\r\n        \"ipsControl\": false,\r\n        \"enforceBandwidthControl\": true,\r\n        \"upBandwidth\": 5000,\r\n        \"dnBandwidth\": 10000\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/locationTemplate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Update Individual Location Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/locationTemplate/{locTempID}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate",
+								"{locTempID}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location Management - Delete Individual Location Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/locationTemplate/{locTempID}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"locationTemplate",
+								"{locTempID}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin and Role Management",
+			"item": [
+				{
+					"name": "Admin and Role Management - Get All Admin Roles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/adminRoles",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminRoles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Get Individual Admin Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/adminRoles/{roleid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminRoles",
+								"{roleid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Create Admin Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/adminRoles",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminRoles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Update Individual Admin Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/adminRoles/{roleid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminRoles",
+								"{roleid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Delete Individual Admin Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/adminRoles/{roleid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminRoles",
+								"{roleid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/adminUsers",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Get Individual User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/adminUsers/{userid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminUsers",
+								"{userid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Update Individual User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/adminUsers/{userid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminUsers",
+								"{userid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Delete Individual User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/adminUsers/{userid}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminUsers",
+								"{userid}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin and Role Management - Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/adminUsers",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"adminUsers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activation",
+			"item": [
+				{
+					"name": "Activation - Activate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/ecAdminActivateStatus/activate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ecAdminActivateStatus",
+								"activate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Activation - Force Activate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/ecAdminActivateStatus/forcedActivate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ecAdminActivateStatus",
+								"forcedActivate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Provisioning",
+			"item": [
+				{
+					"name": "Provisioning - Get All Provisioning Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/provUrl",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"provUrl"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Get Individual Provisioning Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/provUrl/3216",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"provUrl",
+								"3216"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Create Provisioning Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test_Provisioning_Template\",\n    \"desc\": \"Testing\",\n    \"provUrlData\": {\n        \"locationTemplate\": {\n            \"id\": 9547,\n            \"name\": \"Loc_Temp_2\"\n        },\n        \"formFactor\": \"SMALL\",\n        \"cloudProviderType\": \"AWS\"\n    },\n    \"provUrlType\": \"CLOUD\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/provUrl",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"provUrl"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Update Provisioning Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 13320,\r\n    \"name\": \"Test_Provisioning_Template1\",\r\n    \"desc\": \"Testing\",\r\n    \"provUrlType\": \"CLOUD\",\r\n    \"provUrlData\": {\r\n        \"locationTemplate\": {\r\n            \"id\": 9547,\r\n            \"name\": \"Loc_Temp_2\",\r\n            \"template\": {\r\n                \"templatePrefix\": \"Loc_Temp_2\",\r\n                \"xffForwardEnabled\": false,\r\n                \"authRequired\": false,\r\n                \"cautionEnabled\": false,\r\n                \"aupEnabled\": false,\r\n                \"aupTimeoutInDays\": 0,\r\n                \"ofwEnabled\": false,\r\n                \"ipsControl\": false,\r\n                \"enforceBandwidthControl\": true,\r\n                \"upBandwidth\": 10000000,\r\n                \"dnBandwidth\": 10000000\r\n            }\r\n        },\r\n        \"cloudProviderType\": \"AWS\",\r\n        \"formFactor\": \"SMALL\"\r\n    }\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/provUrl/13320",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"provUrl",
+								"13320"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Delete Provisioning Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/provUrl/13320",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"provUrl",
+								"13320"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Get API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/apiKeys",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"apiKeys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provisioning - Regenerate API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "ZS_CUSTOM_CODE",
+								"value": "{{sessionCode}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/apiKeys/{keyid}/regenerate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"apiKeys",
+								"{keyid}",
+								"regenerate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
