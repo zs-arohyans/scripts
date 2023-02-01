@@ -95,5 +95,5 @@ for cGroups in connectorGroups:
                 time.sleep(1)
 
 # Force activate after changes
-#print("Activating Changes")
-#print(forcedActivate(f).text)
+print("Activating Changes")
+print(forcedActivate(f).text)
