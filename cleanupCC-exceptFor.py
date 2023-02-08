@@ -7,8 +7,11 @@ username = input("Username: ")
 password = getpass.getpass("Password: ")
 apiKey = input("APIKey: ")
 
+# Ask for VPC ID:
+vpcID = input("Enter a VPC/VNet ID (e.g. vpc-00d78920e5c2cda42) to restrict the action to a specific VPC/VNet, or leave blank and press <Enter> to continue: ")
+
 # Ask for CC IDs
-prompt = "Enter the Active CC IDs (e.g. zs-cc-vpc-00d78920e5c2cda42-us-west-2b-VM-vkSjs) you wish to keep. Leave blank and press <Enter> when complete: "
+prompt = "Enter the Active CC IDs (e.g. zs-cc-vpc-00d78920e5c2cda42-us-west-2b-VM-vkSjs) you wish to retain - 1 per line.\nLeave blank and press <Enter> when complete: "
 ccID = []
 line = input(prompt)
 while line:
@@ -16,9 +19,27 @@ while line:
     line = input(prompt)
 
 # Confirm Intentions
-print("You entered:")
-print(ccID)
-confirm = input("Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive): ")
+if not vpcID:
+    print("You entered the following CC IDs that will be RETAINED:")
+    print(ccID)
+    ccConfirm = input("Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive): ")
+
+elif vpcID is not None:
+    if not ccID:
+        print("You did not enter any CC IDs. This will remove all CC VMs within the following VPC/VNet: ")
+        print(vpcID)
+        ccConfirm = input("Are you sure you want to remove all CC VMs within this VPC/VNet? Please answer YES or NO (case sensitive): ")
+    elif ccID is not None:
+        print("The following CC VMs will be RETAINED:")
+        print(ccID)
+        print("Inside the following VPC:")
+        print(vpcID)
+        ccConfirm = input("Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive): ")
+
+else:
+    if not ccID and not vpcID:
+        print("You did not enter any CC IDs or a VPC/VNet ID. This will remove all CC VMs.")
+        ccConfirm = input("Are you sure you want to remove all CC VMs? Please answer YES or NO (case sensitive): ")
 
 # Construct base URL
 base_url = "https://connector." + cloudName + "/api/v1/"
@@ -52,7 +73,14 @@ def createSession(username, password, apiKey):
 def getConnectorGroup(s):
     ccgroup_url = base_url + 'ecgroup'
     list_of_ccgroups = s.get(ccgroup_url, headers=headers)
-    return list_of_ccgroups.json()
+    if vpcID is None:
+        return list_of_ccgroups.json()
+    else:
+        filtered_list = []
+        for cGroups in list_of_ccgroups.json():
+            if vpcID in cGroups['name']:
+                filtered_list.append(cGroups)
+        return filtered_list
 
 # Delete Cloud Connector VM
 def deleteConnector(s,ccGroupID,vmID):
@@ -71,9 +99,27 @@ f = createSession(username, password, apiKey)
 
 connectorGroups = getConnectorGroup(f)
 
+# Double Confirm
+print("The following CC VMs will be DELETED.")
+for cGroups in connectorGroups:
+    if ccConfirm == "NO":
+        print("Aborted")
+        sys.exit()
+    else:
+        ccGroupID = cGroups['id']
+        # Cycle through the list of VMs in the CC group
+        for vm in range(len(cGroups['ecVMs'])):
+            if (cGroups['ecVMs'][vm]['name']) in ccID:
+                continue
+            else:
+                print(cGroups['ecVMs'][vm]['name'], end=' (')
+                print (cGroups['ecVMs'][vm]['id'], end=')\n')
+
+ccConfirm = input("Are you sure you wish to continue? Please answer YES or NO (case sensitive): ")
+
 # Delete CC VMs
 for cGroups in connectorGroups:
-    if confirm == "NO":
+    if ccConfirm == "NO":
         print("Aborted")
         sys.exit()
     else:
@@ -95,5 +141,5 @@ for cGroups in connectorGroups:
                 time.sleep(1)
 
 # Force activate after changes
-print("Activating Changes")
-print(forcedActivate(f).text)
+#print("Activating Changes")
+#print(forcedActivate(f).text)
