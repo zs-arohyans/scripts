@@ -19,27 +19,59 @@ while line:
     line = input(prompt)
 
 # Confirm Intentions
-if not vpcID:
-    print("You entered the following CC IDs that will be RETAINED:")
-    print(ccID)
-    ccConfirm = input("Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive): ")
+if not vpcID:  # VPC ID is empty
+    if not ccID: # CC ID is empty
+        print("You did not enter any CC IDs or a VPC/VNet ID. This will \033[0;37;41mremove all CC VMs (nuclear option)\033[0m")
+        while True:
+            ccConfirm = input("\033[0;31;43m\U000026A0 Are you sure you want to remove all CC VMs? Please answer YES or NO (case sensitive)\U000026A0 :\033[0m")
+            if ccConfirm == "YES":
+                break
+            elif ccConfirm == "NO":
+                print("Aborted")
+                sys.exit()
+                break
+            else:
+                print("Incorrect input, please try again (Please answer YES or NO)!")
+    else: # CC ID entered
+        print("You entered the following CC IDs that will be RETAINED:")
+        print(ccID)
+        while True:
+            ccConfirm = input("\033[0;31;43m\U000026A0 Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive)\U000026A0 :\033[0m ")
+            if ccConfirm == "YES":
+                break
+            elif ccConfirm == "NO":
+                print("Aborted")
+                sys.exit()
+                break
+            else:
+                print("Incorrect input, please try again (Please answer YES or NO)!")
 
-elif vpcID is not None:
-    if not ccID:
+else: # VPC ID entered 
+    if not ccID: # CC ID is empty
         print("You did not enter any CC IDs. This will remove all CC VMs within the following VPC/VNet: ")
         print(vpcID)
-        ccConfirm = input("Are you sure you want to remove all CC VMs within this VPC/VNet? Please answer YES or NO (case sensitive): ")
-    elif ccID is not None:
-        print("The following CC VMs will be RETAINED:")
-        print(ccID)
-        print("Inside the following VPC:")
-        print(vpcID)
-        ccConfirm = input("Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive): ")
-
-else:
-    if not ccID and not vpcID:
-        print("You did not enter any CC IDs or a VPC/VNet ID. This will remove all CC VMs.")
-        ccConfirm = input("Are you sure you want to remove all CC VMs? Please answer YES or NO (case sensitive): ")
+        while True:
+            ccConfirm = input("\033[0;31;43m\U000026A0 Are you sure you want to remove all CC VMs within this VPC/VNet? Please answer YES or NO (case sensitive)\U000026A0 :\033[0m ")
+            if ccConfirm == "YES":
+                break
+            elif ccConfirm == "NO":
+                print("Aborted")
+                sys.exit()
+                break
+            else:
+                print("Incorrect input, please try again (Please answer YES or NO)!")
+    else: # CC ID entered
+        print(f"The following CC VMs will be RETAINED: {ccID} inside the follow VPC: {vpcID}")
+        while True:
+            ccConfirm = input("\033[0;31;43m\U000026A0 Are you sure you want to remove all other CC VMs? Please answer YES or NO (case sensitive)\U000026A0 :\033[0m ")
+            if ccConfirm == "YES":
+                break
+            elif ccConfirm == "NO":
+                print("Aborted")
+                sys.exit()
+                break
+            else:
+                print("Incorrect input, please try again (Please answer YES or NO)!")
 
 # Construct base URL
 base_url = "https://connector." + cloudName + "/api/v1/"
@@ -102,29 +134,30 @@ connectorGroups = getConnectorGroup(f)
 # Double Confirm
 print("The following CC VMs will be DELETED.")
 for cGroups in connectorGroups:
-    if ccConfirm == "NO":
+    ccGroupID = cGroups['id']
+    # Cycle through the list of VMs in the CC group
+    for vm in range(len(cGroups['ecVMs'])):
+        if (cGroups['ecVMs'][vm]['name']) in ccID:
+            continue
+        else:
+            print(cGroups['ecVMs'][vm]['name'], end=' (')
+            print (cGroups['ecVMs'][vm]['id'], end=')\n')
+
+while True:
+    ccConfirm = input("Are you sure you wish to continue? Please answer YES or NO (case sensitive): ")
+    if ccConfirm == "YES":
+        break
+    elif ccConfirm == "NO":
         print("Aborted")
         sys.exit()
+        break
     else:
-        ccGroupID = cGroups['id']
-        # Cycle through the list of VMs in the CC group
-        for vm in range(len(cGroups['ecVMs'])):
-            if (cGroups['ecVMs'][vm]['name']) in ccID:
-                continue
-            else:
-                print(cGroups['ecVMs'][vm]['name'], end=' (')
-                print (cGroups['ecVMs'][vm]['id'], end=')\n')
-
-ccConfirm = input("Are you sure you wish to continue? Please answer YES or NO (case sensitive): ")
-
-# Delete CC VMs
+        print("Incorrect input, please try again (Please answer YES or NO)!")
+    
+# Cycle through the list of VMs in the CC group
 for cGroups in connectorGroups:
-    if ccConfirm == "NO":
-        print("Aborted")
-        sys.exit()
-    else:
+    if ccConfirm == "YES":
         ccGroupID = cGroups['id']
-        # Cycle through the list of VMs in the CC group
         for vm in range(len(cGroups['ecVMs'])):
             if (cGroups['ecVMs'][vm]['name']) in ccID:
                 continue
